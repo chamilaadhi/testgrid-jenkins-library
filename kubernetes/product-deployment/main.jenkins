@@ -253,8 +253,17 @@ pipeline {
                         credentialsId: "testgrid-aws-kubernetes",
                         accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]]) {
-                        sh "./kubernetes/product-deployment/scripts/deploy.sh ${product_name}"
+                    ],
+                    string(
+                        credentialsId: 'WUM_USERNAME',
+                        variable: 'wum_usr'
+                    ),
+                    string(
+                        credentialsId: 'WUM_PASSWORD',
+                        variable: 'wum_pwd'
+                    )
+                    ]) {
+                        sh "./kubernetes/product-deployment/scripts/deploy.sh ${product_name} ${wum_usr} ${wum_pwd}"
                     }
                 }
             }
