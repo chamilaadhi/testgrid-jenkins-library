@@ -78,7 +78,7 @@ pipeline {
 			"""),
                             string(
                                 name: 'deployment_script_repo_url',
-                                defaultValue: 'https://github.com/wso2/apim-test-integration',
+                                defaultValue: 'https://github.com/chamilaadhi/apim-test-integration',
                                 description: 'Product deployment script repository.',
                                 trim: true
                             ),
@@ -123,19 +123,19 @@ pipeline {
                                 """),           
                             string(
                                 name: 'kubernetes_repo_url',
-                                defaultValue: 'https://github.com/wso2/kubernetes-apim',
+                                defaultValue: 'https://github.com/chamilaadhi/kubernetes-apim',
                                 description: "Product's kubernetes repository URL.",
                                 trim: true
                             ),
                             string(
                                 name: 'kubernetes_repo_branch',
-                                defaultValue: '4.1.x',
+                                defaultValue: '3.2.x-profile-testing',
                                 description: 'Branch name of the kubernetes repository.',
                                 trim: true
                             ),
                             string(
                                 name: 'path_to_helm_folder',
-                                defaultValue: 'advanced/am-pattern-4',
+                                defaultValue: 'advanced/am-pattern-2',
                                 description: 'Relative path of the helm folder in your helm repository.',
                                 trim: true
                             ),
@@ -180,7 +180,7 @@ pipeline {
                             ),
                             string(
                                 name: 'service_startup_timeout',
-                                defaultValue: '600',
+                                defaultValue: '1800',
                                 description: 'Service up timeout in seconds.',
                                 trim: true
                             )
@@ -256,7 +256,7 @@ pipeline {
                         accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                     ]]) {
-                        sh "./kubernetes/product-deployment/scripts/deploy.sh ${product_name} $WUM_USER $WUM_PWD"
+                        sh "./kubernetes/product-deployment/scripts/deploy.sh ${product_name} ${WUM_USER} ${WUM_PWD}"
                     }
                 }
             }
