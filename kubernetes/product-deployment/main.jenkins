@@ -29,27 +29,6 @@ pipeline {
         WUM_PWD = credentials('WUM_PASSWORD')
     }
     stages {
-	stage('Check Newman Availability') {
-            steps {
-                script {
-                    def newmanVersion = sh(
-                        returnStdout: true,
-                        script: '/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman --version'
-                    ).trim()
-                    
-                    def newmanInstalled = sh(
-                        returnStatus: true,
-                        script: 'command -v /home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman'
-                    ) == 0
-                    
-                    if (newmanInstalled) {
-                        echo "Newman is available in the system. Version: ${newmanVersion}"
-                    } else {
-                        error "Newman is not installed or not available in the system."
-                    }
-                }
-            }
-        }
         stage('Clone repo') {
             steps {
                 script {
@@ -283,7 +262,7 @@ pipeline {
                 }
             }
         }
-        stage('Testing') {
+        stage('Awaiting deployment readiness') {
             steps {
                 script {
                     echo "\n\n\n\n=============================================="
@@ -302,6 +281,26 @@ pipeline {
                         sh "kubectl wait --for=condition=ready pod   -l product='$product_name'   --timeout='$service_startup_timeout's --namespace='$kubernetes_namespace'"
                         env.HOST_NAME=hostName.trim()
                         sh "./kubernetes/product-deployment/scripts/test.sh ${product_name} ${test_file_path}"
+                    }
+                }
+            }
+        }
+        stage('Run API Manager profile tests') {
+            steps {
+                script {
+                    def host = sh(
+                            returnStdout: true, 
+                            script: './kubernetes/product-deployment/scripts/extract-cluster-details.sh'
+                    ).trim()
+
+                    def newmanResult = sh (
+                        script: "/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman run kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/Profile_Setup_Tests.postman_collection.json -e kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/APIM_Environment.postman_environment.json --env-var \"cluster_ip=$host\"  --insecure --reporters junit,cli",
+                        returnStatus: true
+                    )
+                    if (newmanResult == 0) {
+                        echo "Newman tests passed successfully."
+                    } else {
+                        error "Newman tests failed. Please check the test results for more details."
                     }
                 }
             }
