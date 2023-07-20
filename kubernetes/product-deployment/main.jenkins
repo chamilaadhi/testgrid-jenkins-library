@@ -288,19 +288,26 @@ pipeline {
         stage('Run API Manager profile tests') {
             steps {
                 script {
-                    def host = sh(
+		     withCredentials([[
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: "testgrid-aws-kubernetes",
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]]) {
+		        def host = sh(
                             returnStdout: true, 
                             script: './kubernetes/product-deployment/scripts/extract-cluster-details.sh'
-                    ).trim()
-
-                    def newmanResult = sh (
-                        script: "/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman run kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/Profile_Setup_Tests.postman_collection.json -e kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/APIM_Environment.postman_environment.json --env-var \"cluster_ip=$host\"  --insecure --reporters junit,cli",
-                        returnStatus: true
-                    )
-                    if (newmanResult == 0) {
-                        echo "Newman tests passed successfully."
-                    } else {
-                        error "Newman tests failed. Please check the test results for more details."
+                        ).trim()
+			echo "Host : " $host
+                        def newmanResult = sh (
+                           script: "/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman run kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/Profile_Setup_Tests.postman_collection.json -e kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/APIM_Environment.postman_environment.json --env-var \"cluster_ip=$host\"  --insecure --reporters junit,cli",
+                           returnStatus: true
+                        )
+                        if (newmanResult == 0) {
+                           echo "Newman tests passed successfully."
+                        } else {
+                           error "Newman tests failed. Please check the test results for more details."
+                        }
                     }
                 }
             }
