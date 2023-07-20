@@ -29,6 +29,27 @@ pipeline {
         WUM_PWD = credentials('WUM_PASSWORD')
     }
     stages {
+	stage('Check Newman Availability') {
+            steps {
+                script {
+                    def newmanVersion = sh(
+                        returnStdout: true,
+                        script: 'newman --version'
+                    ).trim()
+                    
+                    def newmanInstalled = sh(
+                        returnStatus: true,
+                        script: 'command -v newman'
+                    ) == 0
+                    
+                    if (newmanInstalled) {
+                        echo "Newman is available in the system. Version: ${newmanVersion}"
+                    } else {
+                        error "Newman is not installed or not available in the system."
+                    }
+                }
+            }
+        }
         stage('Clone repo') {
             steps {
                 script {
