@@ -262,7 +262,7 @@ pipeline {
                 }
             }
         }
-        stage('Awaiting deployment readiness') {
+        stage('Run Tests') {
             steps {
                 script {
                     echo "\n\n\n\n=============================================="
@@ -285,70 +285,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Host') {
-            steps {
-                script {
-                    echo "\n\n\n\n=============================================="
-                    echo "Testing ${product_name} into cluster"
-                    echo "==============================================\n\n\n\n"
-                    withCredentials([[
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: "testgrid-aws-kubernetes",
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]]) {
-                        hostName = sh(
-                        	returnStdout: true,
-                        	script: 'kubectl -n ingress-nginx get svc ingress-nginx-controller -o json | jq -r \'.status.loadBalancer.ingress[0].hostname\''
-                    	).trim();
-			echo "Host === ++  " $hostName
-                        def newmanResult = sh (
-                           script: "/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman run kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/Profile_Setup_Tests.postman_collection.json -e kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/APIM_Environment.postman_environment.json --env-var \"cluster_ip=$hostName\"  --insecure --reporters junit,cli",
-                           returnStatus: true
-                        )
-                        if (newmanResult == 0) {
-                           echo "Newman tests passed successfully."
-                        } else {
-                           error "Newman tests failed. Please check the test results for more details."
-                        }
-                    }
-                }
-            }
-        }
-        stage('Run API Manager profile tests') {
-            steps {
-                script {
-                    echo "\n\n\n\n=============================================="
-                    echo "Testing ${product_name} into cluster"
-                    echo "==============================================\n\n\n\n"
-                    withCredentials([[
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: "testgrid-aws-kubernetes",
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]]) {
-                        hostName = sh(
-                            returnStdout: true, 
-                            script: './kubernetes/product-deployment/scripts/extract-cluster-details.sh'
-                        ).trim()
-			echo "Host === " $hostName
-                        def newmanResult = sh (
-                           script: "/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman run kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/Profile_Setup_Tests.postman_collection.json -e kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/APIM_Environment.postman_environment.json --env-var \"cluster_ip=$hostName\"  --insecure --reporters junit,cli",
-                           returnStatus: true
-                        )
-                        if (newmanResult == 0) {
-                           echo "Newman tests passed successfully."
-                        } else {
-                           error "Newman tests failed. Please check the test results for more details."
-                        }
-                    }
-                }
-            }
-        }
-
-
-
     }
     post {
         always {
