@@ -34,12 +34,12 @@ pipeline {
                 script {
                     def newmanVersion = sh(
                         returnStdout: true,
-                        script: 'newman --version'
+                        script: '/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman --version'
                     ).trim()
                     
                     def newmanInstalled = sh(
                         returnStatus: true,
-                        script: 'command -v newman'
+                        script: 'command -v /home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman'
                     ) == 0
                     
                     if (newmanInstalled) {
@@ -183,7 +183,7 @@ pipeline {
 			"""),
                             string(
                                 name: 'product_testing_repo_url',
-                                defaultValue: 'https://github.com/wso2/apim-test-integration',
+                                defaultValue: 'https://github.com/chamilaadhi/apim-test-integration',
                                 description: "Product's testing repository URL.",
                                 trim: true
                             ),
