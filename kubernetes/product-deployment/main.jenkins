@@ -34,7 +34,7 @@ pipeline {
                 script {
                     def newmanVersion = sh(
                         returnStdout: true,
-                        script: 'newman --version'
+                        script: '/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman --version'
                     ).trim()
                     
                     def newmanInstalled = sh(
