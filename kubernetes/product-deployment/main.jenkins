@@ -299,8 +299,9 @@ pipeline {
                             script: './kubernetes/product-deployment/scripts/extract-cluster-details.sh'
                         ).trim()
 			echo "Host : " $host
+			echo "Host env " ${env.HOST_NAME} 
                         def newmanResult = sh (
-                           script: "/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman run kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/Profile_Setup_Tests.postman_collection.json -e kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/APIM_Environment.postman_environment.json --env-var \"cluster_ip=$host\"  --insecure --reporters junit,cli",
+                           script: "/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman run kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/Profile_Setup_Tests.postman_collection.json -e kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/APIM_Environment.postman_environment.json --env-var \"cluster_ip=${env.HOST_NAME}\"  --insecure --reporters junit,cli",
                            returnStatus: true
                         )
                         if (newmanResult == 0) {
