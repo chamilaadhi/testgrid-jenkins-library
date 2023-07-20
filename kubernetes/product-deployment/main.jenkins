@@ -39,7 +39,7 @@ pipeline {
                     
                     def newmanInstalled = sh(
                         returnStatus: true,
-                        script: 'command -v newman'
+                        script: 'command -v /home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman'
                     ) == 0
                     
                     if (newmanInstalled) {
@@ -228,6 +228,18 @@ pipeline {
                     echo "workspace path : ${env.WORKSPACE} pwd: "
                     sh "pwd"
                     sh "chmod +x -R ${env.WORKSPACE}"
+                }
+            }
+        }
+        stage('Validate Test cases') {
+            steps {
+                script {
+                    echo "\n\n\n\n=============================================="
+                    echo "Validate. Testcases"
+                    echo "==============================================\n\n\n\n"
+		    echo "ls kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/"
+		    echo "==============================================\n\n\n\n"
+		    sh '/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman run kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/Profile_Setup_Tests.postman_collection.json -e kubernetes/product-deployment/scripts/${product_name}/test-${product_name}/tests-cases/profile-tests/APIM_Environment.postman_environment.json --env-var cluster_ip=34.72.203.27 --insecure'
                 }
             }
         }
