@@ -32,6 +32,11 @@ pipeline {
 	stage('Check Newman Availability') {
             steps {
                 script {
+		    echo "=== nvm =="
+		    sh 'nvm -v'
+		    echo "=== npm =="
+		    sh 'npm ls -g'
+		    echo "=== == =="
                     def newmanVersion = sh(
                         returnStdout: true,
                         script: '/home/ubuntu/.nvm/versions/node/v19.0.1/bin/newman --version'
